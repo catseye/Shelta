@@ -1,0 +1,34 @@
+;
+  99.she v1999.12.23 (c)2000 Chris Pressey, Cat's Eye Technologies.
+  The song "Ninety-Nine Bottles of Beer" implemented in Shelta/GUPI.
+;
+
+[ _32 `bottles _32 `of _32 `beer _32 `on _32 `the _32 `wall, _13 _10 ]=L1
+[ _32 `bottles _32 `of _32 `beer, _13 _10 ]=L2
+[ `Take _32 `one _32 `down, _32 `pass _32 `it _32 `around, _13 _10 ]=L3
+[ _32 `bottles _32 `of _32 `beer _32 `on _32 `the _32 `wall. _13 _10 _13 _10 ]=L4
+
+[ `9 ]=bh [ `9 ]=bl
+[ begin ^bh getb outc ^bl getb outc end ]=btls
+[ begin ^bh getb \1 - ^bh putb \57 ^bl putb end ]=digit
+
+[ [ ]=iloop
+
+  ^btls do
+  ^L1 \31 outs
+
+  ^btls do
+  ^L2 \19 outs
+
+  ^L3 \32 outs
+
+  ^bl getb \1 - ^bl putb
+  ^bl getb \47 - zero ^digit doif
+
+  ^btls do
+  ^L4 \33 outs
+
+  ^bh getb \47 - ^iloop toif
+
+  \0 halt
+] to

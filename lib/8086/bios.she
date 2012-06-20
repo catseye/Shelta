@@ -1,0 +1,20 @@
+;
+  8086\bios.she v1999.12.23 (c)1999 Chris Pressey, Cat's-Eye Technologies.
+  BIOS interface for the OS-dependent part of GUPI.
+;
+
+;interrupt # for keybd ; [ _22 ]:keybd
+;interrupt # for video ; [ _16 ]:video
+
+;        void -> halt; [ pop-ax jmp _254 ]:halt
+
+;        char -> void; [ pop-ax mov-ah _14 mov-bl _15 int video ]:outc
+
+;string sizeb -> void; [ pop-dx pop-si mov-al[si]
+			 mov-ah _14 mov-bl _15 int video
+			 inc-si dec-dx or-dx-dx jne _242 ]:outs
+
+;        void -> char; [ xor-ah-ah int keybd xor-ah-ah push-ax ]:qinc
+;        void -> char; [ qinc dup outc ]:inc
+;        void -> bool; [ mov-ah _1 int keybd je _4 inc-ax jmp _3 nop xor-ax-ax push-ax ]:chkin
+;        void -> void; [ mov-ah _1 int keybd je _6 xor-ah-ah int keybd jmp _244 ]:flin

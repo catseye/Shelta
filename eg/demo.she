@@ -1,0 +1,46 @@
+;
+  demo.she v1999.12.23 (c)2000 Chris Pressey, Cat's Eye Technologies.
+  A demonstration of some of the basic features of Shelta and GUPI.
+;
+
+[
+  [ ]=hw `Hello, _32 `world!     ; an empty block denotes a label ;
+  [ ]=eol _13 _10
+]=hello
+
+[ _0 ]=i
+[ _0 ]=pad
+[ __0 ]=hptr
+
+[
+  begin
+  \1024 malloc ^hptr putw
+  [ ]=wloop
+    ^i getb ^hptr getw ^i getb + putb
+    ^i getb ++ ^i putb
+    ^i getb ^wloop toif
+  ^hptr getw \32 + \223 outs
+  end
+] do
+
+^hello \15 outs
+
+^hw \12 outs
+^eol \2 outs
+
+^hello getb outc
+
+^hello \1 + getb outc
+
+\65 ^hello putb ^hello \15 outs
+
+\1000 \8 / outc
+\8 \8 * ++ outc
+\8 \9 * ++ outc
+\9 \9 * -- outc
+
+flin
+[
+  [ ]=loop
+  inc outc ^loop to ;forever!;
+] to

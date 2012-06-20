@@ -1,0 +1,121 @@
+;
+  8086\8086.she v1999.10.10 (c)1999 Chris Pressey, Cat's-Eye Technologies.
+  Defines the instructions of the Intel 8086 chip and it's successors.
+;
+
+[ _244 ]:hlt
+
+[ _146 ]:xchg-dx-ax
+[ _147 ]:xchg-bx-ax
+[ _145 ]:xchg-cx-ax
+
+[ _80 ]:push-ax
+[ _83 ]:push-bx
+[ _81 ]:push-cx
+[ _82 ]:push-dx
+
+[ _255 _55 ]:push[bx]
+
+[ _57 _195 ]:cmp-bx-ax
+
+[ _161 ]:mov-ax[]
+[ _163 ]:mov[]ax
+
+[ _142 _6 ]:mov-es[]
+
+[ _88 ]:pop-ax
+[ _91 ]:pop-bx
+[ _89 ]:pop-cx
+[ _90 ]:pop-dx
+
+[ _95 ]:pop-di
+[ _94 ]:pop-si
+
+[ _86 ]:push-si
+[ _87 ]:push-di
+
+[ _138 _4 ]:mov-al[si]
+[ _58 _5 ]:cmp-al[di]
+
+[ _139 _5 ]:mov-ax[di]
+
+[ _211 _224 ]:shl-ax-cl
+[ _211 _232 ]:shr-ax-cl
+
+[ _209 _224 ]:shl-ax-1
+[ _209 _232 ]:shr-ax-1
+
+[ _180 ]:mov-ah
+[ _176 ]:mov-al
+[ _177 ]:mov-cl
+[ _185 ]:mov-cx
+[ _187 ]:mov-bx
+[ _179 ]:mov-bl
+
+[ _255 _208 ]:call-ax
+[ _255 _224 ]:jmp-ax
+
+[ _50 _192 ]:xor-al-al
+[ _50 _228 ]:xor-ah-ah
+[ _48 _255 ]:xor-bh-bh
+[ _38 ]:es
+
+[ _137 _195 ]:mov-bx-ax
+[ _137 _194 ]:mov-dx-ax
+[ _137 _193 ]:mov-cx-ax
+
+[ _136 _204 ]:mov-ah-cl
+[ _136 _206 ]:mov-dh-cl
+
+[ _139 _210 ]:mov-bx-dx
+[ _136 _7 ]:mov[bx]al
+[ _137 _7 ]:mov[bx]ax
+[ _137 _15 ]:mov[bx]cx
+[ _136 _15 ]:mov[bx]cl
+[ _139 _7 ]:mov-ax[bx]
+[ _138 _15 ]:mov-cl[bx]
+
+[ _136 _5 ]:mov[di]al
+
+[ _116 ]:je
+[ _117 ]:jne
+[ _114 ]:jb
+[ _119 ]:ja
+[ _235 ]:jmp
+[ _11 _192 ]:or-ax-ax
+[ _10 _192 ]:or-al-al
+[ _9 _210 ]:or-dx-dx
+[ _247 _208 ]:not-ax
+
+[ _131 _251 ]:cmp-bx
+
+[ _70 ]:inc-si
+[ _71 ]:inc-di
+
+[ _67 ]:inc-bx
+[ _74 ]:dec-dx
+
+[ _128 _228 ]:and-ah
+[ _35 _194 ]:and-ax-dx
+[ _11 _194 ]:or-ax-dx
+[ _51 _194 ]:xor-ax-dx
+
+[ _49 _201 ]:xor-cx-cx
+[ _51 _192 ]:xor-ax-ax
+[ _49 _210 ]:xor-dx-dx
+
+[ _1 _208 ]:add-ax-dx
+[ _41 _208 ]:sub-ax-dx
+[ _41 _194 ]:sub-dx-ax
+
+[ _247 _234 ]:imul-dx
+[ _247 _249 ]:idiv-cx
+
+[ _64 ]:inc-ax
+[ _72 ]:dec-ax
+
+[ _159 ]:lahf
+[ _235 ]:jmp
+[ _144 ]:nop
+
+[ _205 ]:int

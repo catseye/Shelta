@@ -1,0 +1,9 @@
+;
+  gupi\linklist.she v1999.10.10 (c)1999 Chris Pressey, Cat's-Eye Technologies.
+  GUPI linked list extensions.
+;
+
+; size -> node ;       [ \2 + malloc ]:ll-node
+; next node -> void ;  [ putw ]:ll-link
+; node -> next ;       [ getw ]:ll-next
+; node -> data-ptr ;   [ \2 + ]:ll-dptr

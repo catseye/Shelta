@@ -1,0 +1,5 @@
+;
+  hello.she v1999.12.23 (c)2000 Chris Pressey, Cat's Eye Technologies.
+  The ubiquitous greeting message, implemented in Shelta/GUPI.
+;
+[ `Hello, _32 `world! _13 _10 ] \15 outs \0 halt

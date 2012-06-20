@@ -1,0 +1,65 @@
+;
+  8086\gupi.she v1999.10.10 (c)1999 Chris Pressey, Cat's-Eye Technologies.
+  8086-compatible semantics for GUPI.
+;
+
+; input stack -> output stack ;
+; bottom..top -> top..bottom  ;
+
+;        word -> void     ; [ pop-ax ]:pop
+;        word -> word word; [ pop-ax push-ax push-ax ]:dup
+;   wrd1 wrd2 -> wrd1 wrd2; [ pop-ax pop-bx push-ax push-bx ]:swap
+
+;        addr -> byte     ; [ pop-ax xchg-bx-ax mov-ax[bx] xor-ah-ah push-ax ]:getb
+;   byte addr -> void     ; [ pop-ax xchg-bx-ax pop-cx mov[bx]cl ]:putb
+;        addr -> word     ; [ pop-ax xchg-bx-ax push[bx] ]:getw
+;   word addr -> void     ; [ pop-ax xchg-bx-ax pop-cx mov[bx]cx ]:putw
+
+;        word -> word     ; [ pop-ax inc-ax push-ax ]:++
+;        word -> word     ; [ pop-ax dec-ax push-ax ]:--
+;        word -> word     ; [ pop-ax shl-ax-1 push-ax ]:**
+;        word -> word     ; [ pop-ax shr-ax-1 push-ax ]://
+
+;   word word -> word     ; [ pop-ax xchg-cx-ax pop-ax shl-ax-cl push-ax ]:<<
+;   word word -> word     ; [ pop-ax xchg-cx-ax pop-ax shr-ax-cl push-ax ]:>>
+
+;        addr -> void     ; [ pop-bx mov-ax[bx] inc-ax mov[bx]ax ]:@++
+;        addr -> void     ; [ pop-bx mov-ax[bx] dec-ax mov[bx]ax ]:@--
+
+;   word word -> word     ; [ pop-ax pop-dx add-ax-dx push-ax ]:+
+;   word word -> word     ; [ pop-ax pop-dx sub-dx-ax xchg-dx-ax push-ax ]:-
+;   word word -> word     ; [ pop-ax pop-dx imul-dx push-ax ]:*
+;   word word -> word     ; [ pop-ax xchg-cx-ax pop-ax xor-dx-dx idiv-cx push-ax ]:/
+;   word word -> word     ; [ pop-ax xchg-cx-ax pop-ax xor-dx-dx idiv-cx push-dx ]:%
+;   word word -> word word; [ pop-ax xchg-cx-ax pop-ax xor-dx-dx idiv-cx push-dx push-ax ]:/%
+;   word word -> word     ; [ pop-ax pop-dx or-ax-dx push-ax ]:|
+;   word word -> word     ; [ pop-ax pop-dx and-ax-dx push-ax ]:&
+;   word word -> word     ; [ pop-ax pop-dx xor-ax-dx push-ax ]:~
+;        word -> word     ; [ pop-ax not-ax push-ax ]:!
+;        word -> word     ; [ pop-ax or-ax-ax je _4 xor-ax-ax jmp _1 inc-ax push-ax ]:zero
+;   word word -> word     ; [ pop-ax pop-bx cmp-bx-ax ja _4 xor-ax-ax jmp _1 inc-ax push-ax ]:>
+
+;        addr -> (call)   ; [ pop-ax call-ax ]:do
+;        addr -> (branch) ; [ pop-ax jmp-ax ]:to
+;   bool addr -> (call)   ; [ pop-ax pop-dx or-dx-dx je _2 jmp-ax ]:toif
+;   bool addr -> (branch) ; [ pop-ax pop-dx or-dx-dx je _2 call-ax ]:doif
+
+; memory for call stack:  ; [ __0 __0 __0 __0 __0 __0 __0 __0 
+                              __0 __0 __0 __0 __0 __0 __0 __0 
+                              __0 __0 __0 __0 __0 __0 __0 __0 
+                              __0 __0 __0 __0 __0 __0 __0 __0 ]=clstk
+; memory for stack pointer; [ __0 ]=clsp
+
+;      (call) -> void     ; [ pop-ax _139 _30 _^clsp _137 _135 _^clstk _131 _6 _^clsp _2 ]:begin
+;        void -> (return) ; [ _131 _46 _^clsp _2 _139 _30 _^clsp _139 _135 _^clstk push-ax _195 ]:end
+
+; sizw -> ptrw ;
+  [ mov-bx __260 mov-ax[bx]
+    pop-dx
+    push-ax
+    add-ax-dx
+    mov-bx __260 mov[bx]ax ]:malloc
+
+; ptrw -> void ;
+  [ pop-ax mov-bx __260 mov[bx]ax ]:mfree
+

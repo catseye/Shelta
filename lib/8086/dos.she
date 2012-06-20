@@ -1,0 +1,15 @@
+;
+  8086\dos.she v1999.12.23 (c)1999 Chris Pressey, Cat's-Eye Technologies.
+  DOS interface for the OS-dependent part of GUPI.
+;
+
+;interrupt # for DOS ; [ _33 ]:dos
+
+;        void -> halt; [ pop-ax mov-ah _76 int dos ]:halt
+;string sizeb -> void; [ mov-ah _64 _187 _1 _0 pop-cx pop-dx int dos ]:outs
+;        char -> void; [ mov-ah _2 pop-dx int dos ]:outc
+;        void -> char; [ mov-ah _1 int dos push-ax ]:inc
+;        void -> char; [ mov-ah _7 int dos xor-ah-ah push-ax ]:qinc
+;        void -> bool; [ mov-ah _11 int dos xor-ah-ah push-ax ]:chkin
+;        void -> void; [ xor-ax-ax mov-ah _12 int dos ]:flin
+

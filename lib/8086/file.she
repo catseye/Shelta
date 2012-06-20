@@ -1,0 +1,22 @@
+;
+  8086\fileio.she v1999.12.23
+    (c)1999 Chris Pressey, Cat's-Eye Technologies.
+  DOS file functions.
+;
+
+;        zfnm -> fhdl ;
+  [ pop-dx mov-ah _61 xor-al-al int dos push-ax ]:fopenz
+
+; string fhdl -> fstat ;
+  [ mov-ah _63 pop-bx mov-cx __1 pop-dx int dos push-ax ]:freadc
+
+;        zfnm -> fhdl ;
+  [ pop-dx mov-ah _60 xor-cx-cx int dos ]:fcreatez
+
+;str szb fhdl -> void ;
+  [ mov-ah _64 pop-bx pop-cx pop-dx int dos ]:fwrite
+
+;        fhdl -> void ;
+  [ pop-bx mov-ah _62 int dos ]:fclose
+
+; quit? [ begin ^tokenba getw dup lenz \2 fwrite halt end ]=fnhalt ;

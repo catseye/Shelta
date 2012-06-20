@@ -1,0 +1,44 @@
+;
+  str.she v1999.12.23 (c)2000 Chris Pressey, Cat's Eye Technologies.
+  Demonstrates searching a list of strings.
+;
+
+[ __0 ]=head
+[ __0 ]=newn
+
+[ `Moe _0 ]=s1
+[ `Curly _0 ]=s2
+[ `Larry _0 ]=s3
+
+[ `Larry _0 ]=target     ; change this variable to test ;
+
+[ ; strz -> strz ;
+  begin dup lenz ++ malloc cpzz end
+]=strdup
+
+[ ; stooge -> void ;
+  begin
+  ^strdup do
+  ^head getw \2 ll-node dup ^newn putw ll-link
+  ^newn getw dup ^head putw ll-dptr putw
+  end
+]=add-stooge
+
+[ [ `No ] \2 outs \1 halt ]=no
+[ [ `Yes ] \3 outs \0 halt ]=yes
+
+[
+
+  ^s1 ^add-stooge do
+  ^s2 ^add-stooge do
+  ^s3 ^add-stooge do
+
+  ^head getw ^newn putw
+
+  [ ]=cloop
+    ^newn getw zero ^no toif
+    ^newn getw ll-dptr getw ^target eqzz ^yes toif
+    ^newn getw ll-next ^newn putw
+    ^cloop to
+
+] to

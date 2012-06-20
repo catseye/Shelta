@@ -1,0 +1,382 @@
+;
+  sheltas.she v1999.12.23 (c)2000 Chris Pressey, Cat's Eye Technologies.
+  A bootstrappable Shelta compiler written in Shelta/GUPI.
+;
+
+[ __0 ]=safestart
+[ __0 ]=namestart
+
+[ __0 ]=codeba
+[ __0 ]=stacba
+[ __0 ]=safeba
+[ __0 ]=macrba
+[ __0 ]=tokenba
+
+[ __0 ]=symthead
+[ __0 ]=codeh
+[ __0 ]=stach
+[ __0 ]=safeh
+[ __0 ]=macrh
+[ __0 ]=tokenh
+
+[ begin \16 halt end ]=badtok
+[ begin dupz end ]=fndupz
+
+;--------------------------------------;
+
+[ __0 ]=newn
+[ ; addr dlen strz -> void ;
+  begin
+  ^fndupz do
+ 
+  ; link up the new node ;
+  ^symthead getw \6 ll-node dup ^newn putw ll-link
+  ^newn getw ^symthead putw
+
+  ; addr dlen strz ;
+  ^newn getw ll-dptr putw
+  ^newn getw ll-dptr \2 + putw
+  ^newn getw ll-dptr \4 + putw
+  
+  end
+]=InsertSymbol
+
+[ __0 ]=lui
+[ __0 ]=luitok
+[ \0 end ]=luno
+[ ^lui getw ll-dptr \4 + getw
+  ^lui getw ll-dptr \2 + getw end ]=luyes
+[ ; strz -> dlen addr, that is, addr is pushed first;
+  begin
+  ^luitok putw
+  ^symthead getw ^lui putw
+
+  [ ]=luloop
+    ^lui getw zero ^luno toif
+    ^lui getw ll-dptr getw ^luitok getw eqzz ^luyes toif
+    ^lui getw ll-next ^lui putw
+    ^luloop to
+
+]=LookupSymbol
+
+;--------------------------------------;
+
+[ __0 ]=ddtoken   ; contains pointer into token where to decipher ;
+[ __0 ]=ddvalue   ; contains running tally of the value ;
+[
+  begin
+  ^tokenba getw + ^ddtoken putw
+  \0 ^ddvalue putw
+  [ ]=ddLoop
+    ^ddvalue getw \10 *
+    ^ddtoken getw getb \48 - +
+    ^ddvalue putw
+    
+    ^ddtoken @++
+    ^ddtoken getw getb \47 > ^ddLoop toif
+
+  ^ddvalue getw
+  end
+]=DecipherDecimal
+
+;--------------------------------------;
+
+[
+  begin
+  ^codeh getw ++ putw
+  \184 ^codeh getw putb
+  \80 ^codeh getw \3 + putb
+  ^codeh getw \4 + ^codeh putw
+  end
+]=WritePush
+
+[
+  begin
+  \1 ^DecipherDecimal do ^WritePush do
+  end
+]=PushWord
+
+;--------------------------------------;
+
+[
+  ^tokenba getw \2 + ^LookupSymbol do pop
+  dup zero ^badtok toif
+  ^safeba getw - \260 +
+  ^codeh getw putw
+  ^codeh getw \2 + ^codeh putw
+  end
+]=LiteralSymbol
+[
+  \2 ^DecipherDecimal do ^codeh getw putw
+  ^codeh getw \2 + ^codeh putw
+  end
+]=LiteralWord
+[
+  begin
+
+  ^tokenba getw ++ getb \95 - zero ^LiteralWord toif
+  ^tokenba getw ++ getb \94 - zero ^LiteralSymbol toif
+  \1 ^DecipherDecimal do 
+  ^codeh getw putb
+  ^codeh @++
+  end
+]=LiteralByte
+
+;--------------------------------------;
+
+[
+  begin
+  ^tokenba getw ++ ^LookupSymbol do pop
+  dup zero ^badtok toif
+  ^safeba getw - \260 + ^WritePush do
+  end
+]=PushPointer
+
+;--------------------------------------;
+
+[ __0 ]=strct
+[
+  begin
+  \1 ^strct putw
+  [ ]=strLoop
+
+    ^tokenba getw ^strct getw + getb
+
+    ^codeh getw putb
+
+    ^codeh @++
+    ^strct @++
+
+    ^tokenba getw ^strct getw + getb ^strLoop toif
+
+  end
+]=String
+
+;--------------------------------------;
+
+[
+  begin
+  ^codeh getw
+  ^stach getw putw
+  ^stach getw \2 + ^stach putw
+  end
+]=BeginBlock
+
+[ __0 ]=ebtokptr
+[ __0 ]=ebtoklen
+[ __0 ]=ebdatlen
+[ __0 ]=origcodeh
+[
+  begin
+  ; adjust namestart ... possibly the weirdest Shelta-ism ;
+  ^namestart getw ^origcodeh getw + ^stach getw \2 - getw - ^namestart putw
+  end
+]=AdjustName
+[ __0 ]=nei ; a shared counter the for next two subroutines ;
+[
+  ^macrh getw ^namestart putw
+
+  ; copy everything from origcodeh to codeh into the macro area ;
+
+  ^origcodeh getw ^nei putw
+
+  [ ]=mloop
+
+    ^nei getw getb ^macrh getw putb
+    ^nei @++
+    ^macrh @++
+    ^nei getw ^codeh getw - ^mloop toif
+
+  ; change codeh back to origcodeh ;
+
+  ^origcodeh getw ^codeh putw
+
+  end
+]=MacroInstead
+[
+  begin
+  ^tokenba getw ++ getb \58 - zero ^MacroInstead toif
+
+  ; copy everything from origcodeh to codeh into a safe area ;
+
+  ^origcodeh getw ^nei putw
+
+  [ ]=neloop
+
+    ^nei getw getb ^safeh getw putb
+    ^nei @++
+    ^safeh @++
+    ^nei getw ^codeh getw - ^neloop toif
+
+  ; change codeh back to origcodeh ;
+
+  ^origcodeh getw ^codeh putw
+  end
+]=NotEmpty
+[ begin   ^tokenba getw \2 + ^ebtokptr putw end ]=incebtokptr
+[
+  ; insert name into dictionary ;
+  ^namestart getw ^ebdatlen getw ^ebtokptr getw   ^InsertSymbol do
+  end
+]=NameIt
+[
+  begin
+
+  ^tokenba getw ++ ^ebtokptr putw
+  ^tokenba getw ++ getb \58 - zero ^incebtokptr doif
+  ^tokenba getw ++ getb \61 - zero ^incebtokptr doif
+
+  ^safeh getw dup ^safestart putw ^namestart putw ; track starts ;
+
+  ^ebtokptr getw lenz ^ebtoklen putw
+
+  ^stach getw \2 - ^stach putw
+  ^stach getw getw ^origcodeh putw     ; get original code head ;
+
+  ^codeh getw ^origcodeh getw - ^ebdatlen putw
+
+  ^stach getw ^stacba getw - ^AdjustName doif
+
+  ^ebdatlen getw \0 > ^NotEmpty doif
+
+  ; write push instruction if '=' or ':' not used ;
+
+  ^tokenba getw ++ getb \58 - zero ^NameIt toif
+  ^tokenba getw ++ getb \61 - zero ^NameIt toif
+
+  \184 ^codeh getw putb
+  \80  ^codeh getw \3 + putb
+  ^safestart getw ^safeba getw \260 - - ^codeh getw ++ putw
+
+  ^codeh getw \4 + ^codeh putw
+
+  ^tokenba getw ++ getb ^NameIt toif
+  end
+]=EndBlock
+
+;--------------------------------------;
+
+[ __0 ]=urctr
+[ __0 ]=urlen
+[ __0 ]=uraddr
+[
+  ^codeh getw -- -- ^codeh putw
+  ; ^codeh \4 \2 fwrite ^crlf \2 \2 fwrite ;
+  end
+]=wipeit
+[
+  ^codeh getw \2 - getb \80 - zero ^wipeit toif end
+]=peep
+[
+  ^codeh getw -- getb \88 - zero ^peep toif end
+]=peepok
+[
+  begin
+  ^codeh getw ^codeba getw - ^peepok toif end
+]=clean
+[
+  [ ]=urloop
+    ^uraddr getw getb ^codeh getw putb
+    ^uraddr @++
+    ^codeh @++
+    ^urlen @--
+    ^urctr @++
+
+    ^urctr getw -- zero ^clean doif
+
+    ^urlen getw ^urloop toif
+  end
+]=curloop
+[
+  begin
+  \0 ^urctr putw ^tokenba getw ^LookupSymbol do ^urlen putw
+  dup zero ^badtok toif
+  ^uraddr putw
+
+  ; copy urlen bytes from uraddr to codeh ;
+
+  ; 1999.10.14 peephole optimization commented out.
+    it crashes and it's not strictly necessary.  someday, perhaps... ;
+
+  ^urlen getw ^curloop toif
+
+  end
+]=Unroll
+
+;--------------------------------------;
+
+[ end ]=goodc  ; char was dupped and is on stack ;
+[
+  begin
+  [ ]=floop
+    qinc dup \59 - ^goodc toif pop ; return good char if not semicolon ;
+    [ ]=cloop
+      qinc \59 - zero ^floop toif
+      ^cloop to
+  end
+]=scanc
+
+[ _0 ]=inbyte
+[ _0 ]=eoff
+[ \1 ^eoff putb end ]=goteof
+[
+  begin
+  ^tokenba getw ^tokenh putw
+  [ ]=scanloop
+    ^scanc do ^inbyte putb
+    ^inbyte getb zero ^goteof toif
+    \33 ^inbyte getb > ^scanloop toif
+
+    [ ]=scisloop
+    ^inbyte getb ^tokenh getw putb ^tokenh @++   ;write char to token;
+
+    ^scanc do ^inbyte putb 
+    ^inbyte getb zero ^goteof toif
+    ^inbyte getb \32 > ^scisloop toif
+
+  \0 ^tokenh getw putb
+  end
+]=scantok
+
+; --- startup --- get dynamic memory off of heap --- ;
+
+\16384 malloc dup ^safeba putw \2 + ^safeh putw
+\4096 malloc dup ^macrba putw ^macrh putw
+\4096 malloc dup ^codeba putw ^codeh putw
+\256 malloc dup ^stacba putw ^stach putw
+\128 malloc dup ^tokenba putw ^tokenh putw
+
+[ 
+  ; write output file ;
+
+  ; put in a jump over the safe area ;
+
+  ^safeh getw ^safeba getw - ++
+
+  \233 outc
+  dup \255 & outc \8 >> \255 & outc
+  \144 outc
+
+  ; make the first word of the safe area an offset ;
+  ; to just past the last word of the code ;
+
+  ^safeh getw ^safeba getw - ^codeh getw + ^codeba getw \260 - - ^safeba getw putw
+
+  ^safeba getw ^safeh getw ^safeba getw - outs
+  ^codeba getw ^codeh getw ^codeba getw - outs
+  \0 halt
+]=tail
+[ [ ]=main
+  ^scantok do
+  ^eoff getb ^tail toif
+  ^tokenba getw getb \91 - \5 > ^Unroll doif
+  ^tokenba getw getb \91 - zero ^BeginBlock doif
+  ^tokenba getw getb \92 - zero ^PushWord doif
+  ^tokenba getw getb \93 - zero ^EndBlock doif
+  ^tokenba getw getb \94 - zero ^PushPointer doif
+  ^tokenba getw getb \95 - zero ^LiteralByte doif
+  ^tokenba getw getb \96 - zero ^String doif
+  ^main to
+]=Shelta ^Shelta to
+
+; end of sheltas.she ;

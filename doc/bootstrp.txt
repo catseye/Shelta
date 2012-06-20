@@ -1,0 +1,177 @@
+Making the Snake Eat its Tail: Bootstrapping
+--------------------------------------------
+Oct 20 1999, Chris Pressey, Cat's Eye Technologies.
+
+What is bootstrapping?
+----------------------
+
+Bootstrapping is the act of implementing a compiler for a language in
+that same language, or a subset of it.  It is a well-understood aspect
+of compilation and the translation of compilers from one machine onto
+a different machine.
+
+Bootstrapping is a fairly esoteric discipline, however, partly because
+there's little need to do it more than once for any given compiler and
+any given machine, but also because at a basic level, bootstrapping is
+somewhat difficult to understand.
+
+How, for example, do you write a compiler that compiles itself, without
+first having the compiler???  Sounds more than a little bit like the
+"Which came first, the chicken or the egg" paradox.
+
+The term 'bootstrap' itself comes from the whimsical idea that if you
+were to bend over and tug at the straps on your own boots, you could
+lift yourself off the ground.
+
+So what's the trick to making a compiler levitate?
+--------------------------------------------------
+
+Well, first of all let me put your mind at rest - there's no paradox
+or magic or anything else spooky involved, although it can feel that
+way sometimes.  There are in fact two realistic options for
+bootstrapping:
+
+- Write (on paper) the compiler in the language which it compiles,
+  then hand-translate (i.e. manually compile) it to assembly or
+  machine language.  This approach has been the one taken for the
+  first compilers for both Pascal and LISP.
+
+- First write a compiler for the language in another, already-available
+  language, such as assembly language, or C.  Then re-write that compiler
+  in the language which it compiles.  This is the approach many
+  bootstraps have taken.
+
+How was Shelta bootstrapped?
+----------------------------
+
+I took the second approach.
+
+First I wrote the Shelta compiler SHELTA86.COM in assembly language
+(SHELTA86.ASM) using Turbo Assembler 3.1.
+
+             +----------------+
+SHELTA86.ASM | TASM ---> 8086 | SHELTA86.COM
+             +----+      +----+
+                  | 8086 |
+                  +------+
+                  TASM.EXE
+
+This is a 'tee diagram' as is commonly used by people who have to
+do these sorts of things... it's pretty simple to understand.
+
+The filename on the left is the input into the 'tee', the filename on
+the right is the output of the 'tee'.  The filename on the bottom is
+the tool which is translating the input into the output.  The formats
+listed inside the tee are the languages each of the files is written in.
+
+Because the output of this tee is a compiler, however, it can exist as
+a tee in it's own right:
+
+                        +-----------------+
+                        | Shelta --> 8086 |
+             +----------+-----+      +----+
+SHELTA86.ASM | TASM ---> 8086 | 8086 |
+             +----+      +----+------+
+                  | 8086 |  SHELTA86.COM
+                  +------+
+                  TASM.EXE
+
+So I re-wrote SHELTA86.ASM in Shelta/GUPI, calling it SHELTAS.SHE.
+
+                        +-----------------+
+            SHELTAS.SHE | Shelta --> 8086 | SHELTAS.COM
+             +----------+-----+      +----+
+SHELTA86.ASM | TASM ---> 8086 | 8086 |
+             +----+      +----+------+
+                  | 8086 |  SHELTA86.COM
+                  +------+
+                  TASM.EXE
+
+Lo and behold!  A Shelta compiler written in Shelta.  But that's not
+the whole story - at this point the bootstraps have been pulled taut,
+but there is one more tug that must be made to actually get levitating.
+The compiler SHELTAS.COM must prove it's worth, meeting it's maker
+so to speak:
+
+                                    +-----------------+
+                        SHELTAS.SHE | Shelta --> 8086 | SHELTAS2.COM
+                        +-----------+-----+      +----+
+            SHELTAS.SHE | Shelta --> 8086 | 8086 | 
+             +----------+-----+      +----+------+
+SHELTA86.ASM | TASM ---> 8086 | 8086 |   SHELTAS.COM
+             +----+      +----+------+
+                  | 8086 |  SHELTA86.COM
+                  +------+
+                  TASM.EXE
+
+Now, because of some subtle differences in SHELTA86.ASM and SHELTAS.SHE
+(the assembly language version does no optimization), the sizes and
+contents of all three of these Shelta compilers differ slightly.  But
+if the process was carried on one step further, the resultant compiler
+would be the same as SHELTAS2.COM.  The following might help clarify why
+this is:
+
+                        SHELTAS.SHE +-----------------+
+                         Optimizing | Shelta --> 8086 | SHELTAS2.COM
+            SHELTAS.SHE +-----------+-----+      +----+  Optimizing
+             Optimizing | Shelta --> 8086 | 8086 |       Optimized
+             +----------+-----+      +----+------+
+SHELTA86.ASM | TASM ---> 8086 | 8086 |   SHELTAS.COM
+NonOptimizing+----+      +----+------+    Optimizing
+Hand-Optimized    | 8086 |  SHELTA86.COM  Non-Optimized
+                  +------+ Non-Optimizing
+                           Hand-Optimized
+
+OK, but why did you choose to do this, anyway?
+----------------------------------------------
+
+Well, there was certainly no reason to.  I was not moving Shelta from
+one machine to another, nor was I treating SHELTA86.ASM as a quick
+hack which would be discarded once an optimizing compiler could be
+bootstrapped.
+
+On the other hand, there was no reason *not* to, so...
+
+I did it mainly to say that I could.  Not everyone can design a language,
+write a compiler for it in the form of a 1/2-kbyte COM file, then
+bootstrap it.  I'm not sure I can say it was the hardest thing I've
+ever done, but it was difficult enough.
+
+Plus, well, it's the kind of freaky self-referential thing I've always
+been interested in.  A compiler written in the language which it
+compiles, which in the end appears to have been compiled by itself.
+
+In the preceding section I may have made what I did seem like a walk
+in the park, but it wasn't.  A large portion of the time was spent on:
+
+ - fixing bugs in SHELTA86.ASM
+ - building GUPI so that Shelta could be powerful enough to bootstrap
+   meaningfully (I could have just included SHELTA86.COM entirely as
+   inline assembly, but that would kind of defeat the purpose)
+ - fixing bugs in SHELTAS.SHE
+ - testing SHELTAS2.COM - more concentration than time, actually.
+   When you have five Shelta compilers, two in source form
+   (Turbo Assembler and Shelta) and three in executable form, you're
+   bound to get a little disoriented from having to keep track of
+   their interdependencies.
+
+I can also offer the following piece of advice to anyone who is going
+to be trying something similar: if you've already squashed down your
+first compiler's source code in order to (say) claim bragging rights on
+having built an 512-byte compiler, DO NOT attempt to simply translate
+the optimized assembly code into another language.  Rewrite it instead.
+Especially for a program of this size.  Initially trying to do a
+literal translation from SHELTA86.ASM to SHELTAS.SHE was easily the
+biggest mistake I made.
+
+Where can I find further information on bootstrapping?
+------------------------------------------------------
+
+Two books are of note: the notorious "Dragon" book by Aho, Sethi and
+Ullman gives it a brief once-over; "Compilers and Compiler Generators"
+by Terry gives it a more thorough and readable treatment.
+
+Happy levitating!
+
+Chris Pressey, Oct 20 1999
+Cat's Eye Technologies, Winnipeg, Manitoba, Canada

@@ -1,0 +1,52 @@
+;
+  8086\string.she v1999.10.10 (c)1999 Chris Pressey, Cat's-Eye Technologies.
+  GUPI string-manipulation extensions.
+;
+
+; strz strz -> bool ;
+[
+  pop-di pop-si
+  mov-al[si] cmp-al[di]
+  je _5
+  xor-ax-ax
+  jmp _13
+  nop
+  or-al-al
+  je _4
+  inc-si inc-di
+  jmp _237
+  xor-ah-ah mov-al _1
+  push-ax
+]:eqzz
+
+; strz strz -> strz(2) ;
+[
+  pop-di pop-si push-di
+  mov-al[si] mov[di]al
+  or-al-al
+  je _4
+  inc-si inc-di
+  jmp _244
+]:cpzz
+
+; strz -> word ;
+[
+  pop-si
+  push-si
+  mov-al[si]
+  or-al-al
+  je _3
+  inc-si
+  jmp _247
+  pop-dx
+  push-si
+  pop-ax
+  sub-ax-dx
+  push-ax
+]:lenz
+
+[ ; strz -> strz ;
+  dup lenz ++ malloc cpzz
+]:dupz
+
+
