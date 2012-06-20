@@ -1,29 +1,31 @@
-@echo off
-REM SHELTA.BAT v2002.1208 (c)2002 Cat's-Eye Technologies.
+REM @echo off
+REM SHELTA.BAT
+REM v1.1.2009.0307 (c)1999-2009 Chris Pressey, Cat's-Eye Technologies.
 REM A 'make'-like utility for Shelta compilers, as an MS-DOS batch.
 
 REM -- Change the following lines to tailor what libraries are
 REM -- included by default.  See readme.txt
-type lib\8086\8086.she >s
-type lib\8086\gupi.she >>s
-type lib\8086\dos.she >>s
-type lib\8086\string.she >>s
-type lib\gupi\linklist.she >>s
+type lib\8086\8086.she >s.she
+type lib\8086\gupi.she >>s.she
+type lib\8086\dos.she >>s.she
+type lib\8086\string.she >>s.she
+type lib\gupi\linklist.she >>s.she
 
-REM -- This section builds the source file, always called 'S'.
+REM -- This section builds the source file, always called 's.she'.
 if not exist %2.she echo Can't find project file %2.she!
-if exist %3.she type %3.she >>s
-if exist %4.she type %4.she >>s
-if exist %5.she type %5.she >>s
-if exist %6.she type %6.she >>s
-if exist %7.she type %7.she >>s
-if exist %8.she type %8.she >>s
-if exist %9.she type %9.she >>s
-if exist %2.she type %2.she >>s
-type null.txt >>s
+if exist %3.she type %3.she >>s.she
+if exist %4.she type %4.she >>s.she
+if exist %5.she type %5.she >>s.she
+if exist %6.she type %6.she >>s.she
+if exist %7.she type %7.she >>s.she
+if exist %8.she type %8.she >>s.she
+if exist %9.she type %9.she >>s.she
+if exist %2.she type %2.she >>s.she
+type bin\null.txt >>s.she
 
-bin\shelta%1.com <s > %2.com
+rem bin\shelta%1.com <s.she
+bin\shelta%1.com <s.she >%2.com
 
 if errorlevel 32 echo Source file could not be opened.
 if errorlevel 16 echo Error - Unknown identifier in source file.
-del s
+del s.she

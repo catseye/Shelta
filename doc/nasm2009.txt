@@ -1,0 +1,65 @@
+Well, here we are, ten years later.
+
+What brought me back here was the fact that no one uses Turbo Assembler
+anymore.  I'm not even sure if Borland is around anymore.  And I started
+thinking, well, I use NASM these days; maybe I should translate the 8086
+assembly version of Shelta into NASM.  It's free, and tinkers like free.
+Plus Ben recommended it, way back when it was something like version 0.98.
+I said I'd wait until it was past version 1.0.  Well, it's 2.mumble now, 
+so it's high time, right?
+
+So I started translating, and I discovered just how much more explicit
+NASM is.  I was aiming to reproduce the same SHELTA86.COM file, or at
+least one of the same length with the labels in the same places.  I had
+to go through some lengths to stop NASM from inserting redundant ds:
+segment references, and from padding the start of the data segment to a
+word boundary (I just left out the data segment directive entirely.)
+
+But then, when I got it all nice and translated -- Shock!  Horror!
+I discovered the awful truth: shelta86.com cannot compile sheltas.she.
+
+Where did I get the nerve to say that I had bootstrapped a half-kilobyte
+compiler?  Misleading at best!  I had bootstrapped a probably about 555-
+byte compiler.  I then butchered the language it compiled -- removing
+three instruction forms -- so that I could shove that compiler into half
+a kilobyte.  At no time did I actually bootstrap the <512-byte version.
+No, that would have required rewriting shelta.she to have a lot of blocks
+with temporary names that were only pushed once, and other garbage like
+that, so that the stripped-down compiler wouldn't choke on it.  One of
+the nice things about (the full) Shelta, I think, is that while it is
+small, it doesn't force you to wallow in garbage.  At least not a lot.
+
+So I screwed up my courage, cracked my knuckles, and tried to live up to
+my own hype.  I re-instated the string (`) and push-pointer-anonymously
+(]) functions, which bumped the size back up to around 555 bytes.  I
+didn't bother with the push-named-pointer (]Name) form, because it's not
+used in sheltas.she.  OK, so neither are strings, but a lot of the other
+example Shelta programs use strings, so I thought they would be good to
+have.
+
+I then proceeded to squish the living daylights out of the new, NASM-
+language shelta86.s.  Mostly this involved long, hard looks at the logic
+and detailed liveness analysis (done by hand, of course.)  There were a
+few small tweaks that were easily done; for example, removing one or two
+instructions that were completely unnecessary, and replacing the jmp
+in the handler dispatch with a call (several ret statements take up less
+space than several jmps back to the top of the loop.  Who cares about
+wasting space on the stack?)  The most significant savings, though, came
+from factoring out some code to write a push instruction and calling an
+existing routine for it instead, and from shuffling registers to keep dx
+free long enough so that it, instead of a memory location, could be used
+to store one of the crucial computed pointers.  The result: a 509-byte
+executable which did all that the old shelta86.com could do *and* enough
+more to actually compile sheltas.she!
+
+The old shelta86.com is still in the distribution, for comparison, or
+nostalgia, or completeness, or whatever.  The new executable is called
+sheltan.com (for Shelta in NASM, I suppose.)  The bootstrapping and
+driver scripts have been changed slightly to accomodate this newfangle-
+ness.  I haven't touched the other documentation, which is now slightly
+inaccurate but still quite useful.
+
+Happy bootstrapping!
+Chris Pressey
+March 7, 2009
+Bellevue, WA
