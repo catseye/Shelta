@@ -1,7 +1,7 @@
-REM @echo off
+@echo off
 REM SHELTA.BAT
 REM v1.1.2009.0307 (c)1999-2009 Chris Pressey, Cat's-Eye Technologies.
-REM A 'make'-like utility for Shelta compilers, as an MS-DOS batch.
+REM A 'make'-like utility for Shelta compilers, as an MS-DOS batchfile.
 
 REM -- Change the following lines to tailor what libraries are
 REM -- included by default.  See readme.txt
