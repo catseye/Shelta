@@ -21,8 +21,8 @@ WhileFile:
 ; ----- begin scanning token
 
                 call    word ScanChar   ; get char -> al
-                or      al, al
-                jz      EndFile
+                cmp     al, 0bh         ; is it a vertical tab?
+                je      EndFile
                 cmp     al, 32
                 jbe     WhileFile       ; repeat if char is whitespace
 
@@ -95,15 +95,15 @@ EndFile:        ; put in a jump over the safe area
                 mov     dx, code
                 sub     cx, dx
                 call    word WriteIt
-                
+
                 xor     al, al
 
 GlobalExit:     mov     ah, 4ch         ; exit to DOS
                 int     21h
 
 WriteIt:
-                mov     ah, 40h
-                mov     bx, 1
+                mov     ah, 40h         ; write data to file
+                mov     bx, 1           ; filehandle #1 = stdout
                 int     21h
                 jnc     .OK
                 mov     al, 32

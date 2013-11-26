@@ -324,7 +324,7 @@
   ^tokenba getw ^tokenh putw
   [ ]=scanloop
     ^scanc do ^inbyte putb
-    ^inbyte getb zero ^goteof toif
+    ^inbyte getb \11 - zero ^goteof toif
     \33 ^inbyte getb > ^scanloop toif
 
     [ ]=scisloop

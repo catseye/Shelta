@@ -21,7 +21,7 @@ if exist %7.she type %7.she >>s.she
 if exist %8.she type %8.she >>s.she
 if exist %9.she type %9.she >>s.she
 if exist %2.she type %2.she >>s.she
-type bin\null.txt >>s.she
+type bin\vtab.txt >>s.she
 
 rem bin\shelta%1.com <s.she
 bin\shelta%1.com <s.she >%2.com

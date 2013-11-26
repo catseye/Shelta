@@ -1,0 +1,4 @@
+syntax: regexp
+
+eg/.*\.com
+eg/.*\.COM
