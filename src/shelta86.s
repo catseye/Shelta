@@ -1,6 +1,6 @@
 ;  shelta86.s
-;  v1.1.2009.0307
-;  (c)2009 Chris Pressey, Cat's Eye Technologies.
+;  v1.2-2013.1130
+;  (c)2009-2013 Chris Pressey, Cat's Eye Technologies.  All rights reserved.
 
 ;  Implements an assembler/compiler for the Shelta language, in 8086 machine
 ;  language, in the format of the NASM assembler.

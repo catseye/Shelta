@@ -1,0 +1,90 @@
+Another four years, and here I am again.
+
+Perhaps it's simply bad luck to name a programming language after a spoken
+human language.  After all, it didn't seem to work too well for the Plain
+English folks.
+
+Well anyway.  Lately I've been trying to put my languages and things online.
+The rationale is straightfoward enough; Javascript and HTML5 are mature
+enough to make it possible now, and people by their nature are lazy.  If, to
+try something out, you need to install this, that, and the other on your
+system and configure them, chances are you'll be like, ehh.  Don't feel like
+it right now.  But if it's just on a web page, you don't have that obstacle.
+
+And my thoughts turned to my DOS stuff, because one of the more burdensome
+things to ask the user to install is a system emulator.
+
+I had come across jpc some time earlier, but I'd really prefer something in
+Javascript, just because of the poor security track record Java has had
+lately.  (Guys, the whole idea was that you didn't have to trust a Java
+applet, because it would be running in a virtual machine that didn't allow...
+yeah, anyway)  I looked a bit more and found jslinux, but it isn't open
+source.  So I looked a bit more and eventually found v86.  It's not quite
+as mature as the others, but for simple things it seems to work fine, and
+as a nice bonus it's BSD-licensed, too.
+
+So I started preparing a FreeDOS boot disk image with the Shelta distribution
+on it.  To my surprise, it was flakey.  Sometimes the compilers would work,
+and sometimes they'd hang.  Sometimes the bootstrapped compiler seemed to
+work better than the Nasm one, and sometimes it didn't.  The problems
+persisted after I re-assembled the source with the latest version of Nasm,
+which did generate slightly different code, but only slightly (only two
+instructions in sheltan.com were changed, and the code was the same size.)
+
+This was all somewhat surprising.  The thing is, it worked perfectly in DOSBox
+(which is probably what I was developing it under in 2009.)  And the same
+flakiness was happening under both QEMU and v86, leading me to believe it was
+a problem with FreeDOS.  I tried FreeDOS version 1.1 as well as 1.0 -- no
+difference in behaviour.  I briefly looked for a web-enabled DOSBox, and it
+turns out there are two: jdosbox, which is Java, and a gigantic (~4M) jarfile
+besides, and jsdosbox, which is a GWT hack applied to jdosbox, which is
+frankly really unappealing.
+
+So I turned my attention back to FreeDOS, determined to get Shelta working
+under it under v86.
+
+After some experimentation, I figured it must be INT 21h/ah=07h that FreeDOS
+was having problems with.  It's the legacy DOS function for reading a
+character from standard input.  Shelta uses it because it's significantly
+fewer instructions than the "normal" DOS input function.
+
+Thing is, INT 21h/ah=07h doesn't have a way to indicate EOF.  That's why
+Shelta has traditionally insisted that Shelta source code end with a zero
+byte (ASCII NUL character,) so that it can tell when the source has ended.
+
+If the Shelta compiler wasn't consistently reading that character, that could
+explain the hanging.
+
+But after more experimentation, I couldn't tell what was wrong with
+FreeDOS'es implementation of this function.  I even looked at the FreeDOS
+source code, but it wasn't too helpful; it seems to be implemented in terms
+of the "normal" DOS read function.
+
+It wasn't until I tried replacing the check for the NUL character with a
+different character that it worked.  Yes -- FreeDOS sometimes has trouble
+reading NUL characters using this function.  I'm not sure why.  Since the
+function is for reading from standard input, and in the absence of redirection
+standard input means the keyboard, and on the keyboard you can type a NUL
+(Ctrl+@), and since it works on both MS-DOS whence I originally developed
+Shelta and DOSBox -- this is probably a bug in FreeDOS.  It might be confused
+about standard input not being open in "binary mode" or something.  I'd submit
+a bug report, but this is possibly the only piece of software on the planet
+that is affected...
+
+Anyway, solving the problem after realizing this was simple.  Instead of
+insisting Shelta programs end with a NUL, we now insist that they end with
+everybody's favourite ASCII character, the VERTICAL TAB.  And we apologize
+to all those Shelta users who have huge code bases written in Shelta in which
+vertical tabs are used to critical effect in some way I can't imagine.  For
+the rest of us, the SHELTA.BAT batchfile handles all this for us, so the change
+is pretty much transparent.
+
+The new check for vertical-tab-as-EOF does add a few bytes to the compilers,
+but the Nasm version is still under 512 bytes.
+
+And with those small changes, the Shelta language is now at version 1.2.
+
+Happy bootstrapping -- in your browser!
+Chris Pressey
+November 30, 2013
+Vancouver, BC

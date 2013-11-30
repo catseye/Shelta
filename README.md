@@ -16,7 +16,3 @@ compiled again with the resulting compiler, producing a wholly self-hosted
 executable.
 
 For more information, see the files in the `doc` directory of this distribution.
-
-Note that the Shelta executables run fine under DOSBox, but have some
-mysterious problems when running under FreeDOS under both QEMU and v86, and
-often hang.  (Is it possible FreeDOS has some issues with file redirection?)
